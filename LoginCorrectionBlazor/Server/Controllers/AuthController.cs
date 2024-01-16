@@ -1,4 +1,5 @@
 ﻿using LoginCorrectionBlazor.Server.Context;
+using LoginCorrectionBlazor.Shared.DTO;
 using LoginCorrectionBlazor.Shared.Entities;
 using LoginCorrectionBlazor.Shared.Forms;
 using Microsoft.AspNetCore.Http;
@@ -16,13 +17,19 @@ namespace LoginCorrectionBlazor.Server.Controllers
         [Route("login")]
         public IActionResult Login(LoginForm form)
         {
-            User? u = FakeDB.Users.Find(x  => x.Email == form.Email);
+            User? u = FakeDB.Users.Find(x  => x.Email.ToLower() == form.Email.ToLower());
 
             if (u is not null)
             {
                 if (u.Password == form.Password) 
                 {
-                    return Ok("Bearer " + u.Id);
+                    Console.WriteLine("Success");
+
+                    TokenDTO token = new TokenDTO();
+
+                    token.Token = "Bearer " + u.Id;
+
+                    return Ok(token);
                 }
             }
 
@@ -58,13 +65,17 @@ namespace LoginCorrectionBlazor.Server.Controllers
         [Route("password")]
         public IActionResult ChangePassword( ChangePasswordForm form)
         {
+
             string authorization = Request.Headers[HeaderNames.Authorization];
 
             if (string.IsNullOrEmpty(authorization))
             {
                 return Unauthorized();
             }
-
+            if (authorization.Split(' ').Length < 2)
+            {
+                return Unauthorized();
+            }
             int UserID = Convert.ToInt32(authorization.Split(' ')[1]);
 
             User? u = FakeDB.Users.Find(x => x.Id == UserID);

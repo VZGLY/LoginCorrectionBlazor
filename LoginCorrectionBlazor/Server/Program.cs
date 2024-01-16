@@ -7,6 +7,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy("default", o =>
+    {
+        o.WithMethods("POST", "GET", "PATCH", "PUT")
+        .AllowAnyHeader().WithOrigins("https://localhost");
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -27,6 +36,8 @@ app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseCors("default");
 
 
 app.MapRazorPages();
